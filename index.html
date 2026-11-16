@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA Journey Tracker – problems solved, streaks and daily log</title>
+<meta name="description" content="Personal lifelong dashboard tracking a DSA journey from 2025 onward: problems solved, activity heatmap, monthly trends, searchable daily log and Excel export.">
+<meta name="theme-color" content="#12202c">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312202c'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%237aa5f4' stroke-width='3.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav"><div class="wrap navbar">
+  <div class="brand"><span class="logo" aria-hidden="true"></span><strong>DSA Journey</strong></div>
+  <nav aria-label="Views" class="tabs"><a href="#overview" id="tOverview">Overview</a><a href="#log" id="tLog">Daily log</a></nav>
+  <div class="actions"><button type="button" class="btn ghost" id="exportBtn">Export to Excel</button><button type="button" class="btn primary" id="addBtn">+ Log a day</button></div>
+</div></header>
+<main class="wrap" id="main">
+  <div id="vOverview">
+    <div id="remind" class="remind" role="status" hidden></div>
+    <section class="hero" id="hero" aria-label="Headline numbers"></section>
+    <section class="stats" id="stats" aria-label="Summary metrics"></section>
+    <div class="two">
+      <section class="card" aria-labelledby="hStreak">
+        <h2 id="hStreak" class="mb">Streaks</h2>
+        <h3 class="sub3">Badges earned</h3><ul class="badges" id="badges"></ul>
+        <h3 class="sub3">Longest streaks</h3><ul class="runs" id="runs"></ul>
+        <div class="settings">
+          <label class="chk"><input type="checkbox" id="rOn">Daily reminder</label>
+          <label>Reminder time<input type="time" id="rTime" value="20:00"></label>
+          <label>Daily goal (problems)<input type="number" id="gGoal" min="1" max="100" step="1" inputmode="numeric" placeholder="None"></label>
+        </div>
+        <p class="hint">A day counts when you log any problem, video or time. Missed days reset the streak. Reminders fire while this page is open.</p>
+      </section>
+      <section class="card" aria-labelledby="hRadar">
+        <h2 id="hRadar">Revision radar</h2><p class="hint mb">Topics you have practised before but not touched for a week or more. Revise logs it in one tap.</p>
+        <ul class="radar" id="radar"></ul>
+      </section>
+    </div>
+    <section class="card" aria-labelledby="hHeat">
+      <div class="card-h"><div><h2 id="hHeat">Daily activity</h2><p class="hint">Select a day to open its log entry.</p></div><div class="years" id="years" role="group" aria-label="Choose year"></div></div>
+      <div class="scroll" id="heat"></div>
+      <div class="legend" aria-hidden="true"><span><i class="sw lv0"></i>None</span><span><i class="sw lva"></i>Video or time only</span><span>Problems:</span><span><i class="sw lv1"></i>1–2</span><span><i class="sw lv2"></i>3–5</span><span><i class="sw lv3"></i>6–9</span><span><i class="sw lv4"></i>10+</span></div>
+    </section>
+    <div class="two">
+      <section class="card" aria-labelledby="hMonthly"><div class="card-h"><h2 id="hMonthly">Problems per month</h2><span class="legend m0"><span><i class="sw sn"></i>New</span><span><i class="sw sr"></i>Revised</span></span></div><div id="chart"></div></section>
+      <section class="card" aria-labelledby="hMix"><h2 id="hMix" class="mb">Where the effort goes</h2><div id="mix"></div></section>
+    </div>
+  </div>
+  <div id="vLog" hidden>
+    <section class="card" aria-labelledby="hRec">
+      <div class="card-h"><h2 id="hRec">Daily log</h2><span id="count" class="hint" aria-live="polite"></span></div>
+      <div class="filters">
+        <label class="wide">Search<input type="search" id="q" placeholder="Topic, platform, company, note…" maxlength="80" autocomplete="off"></label>
+        <label>Activity<select id="fAct"><option value="all">All days</option><option value="both">Video + questions</option><option value="video">Video only</option><option value="question">Questions only</option></select></label>
+        <label>Phase<select id="fPhase"><option value="all">All phases</option><option value="Learning">Learning</option><option value="Challenge">Challenge</option></select></label>
+        <label>Platform<select id="fPlat"></select></label>
+        <label>Year<select id="fYear"></select></label>
+        <label>Sort<select id="fSort"><option value="desc">Newest first</option><option value="asc">Oldest first</option></select></label>
+        <label class="chk"><input type="checkbox" id="fRev">Revised only</label>
+        <button type="button" class="btn" id="clear">Clear filters</button>
+      </div>
+      <div id="flt" class="flt"></div>
+      <ul class="list" id="list"></ul>
+      <div class="pager"><span id="pageInfo"></span><div><button type="button" class="btn" id="prev">Previous</button><button type="button" class="btn" id="next">Next</button></div></div>
+    </section>
+  </div>
+</main>
+<footer>Entries you add or edit are saved in this browser only. Export to Excel regularly to keep a backup.</footer>
+
+<dialog id="dlg" aria-labelledby="dlgT">
+  <form id="form" novalidate>
+    <div class="dh"><h2 id="dlgT">Log a day</h2><button type="button" class="x" id="cancel" aria-label="Close">×</button></div>
+    <div class="fsec">
+      <div class="dateRow"><label>Date<input type="date" id="fDate" required min="2025-01-01"></label>
+        <div class="qk"><button type="button" class="chip" data-day="0">Today</button><button type="button" class="chip" data-day="1">Yesterday</button></div></div>
+      <div role="group" aria-label="What did you do?"><p class="lab">What did you do?</p>
+        <div class="kinds"><button type="button" class="kind" data-k="v" aria-pressed="false"><b>Video</b><small>Lecture or concept</small></button><button type="button" class="kind" data-k="q" aria-pressed="true"><b>Questions</b><small>Solved or revised</small></button></div>
+        <p class="hint">Pick one or both.</p></div>
+    </div>
+    <div class="fsec" id="secV" hidden><h3>Video</h3>
+      <label>Video topic<input type="text" id="fVid" maxlength="80" list="vidList" placeholder="e.g. Binary Trees" autocomplete="off"></label><datalist id="vidList"></datalist></div>
+    <div class="fsec" id="secQ"><h3>Questions</h3>
+      <div class="g2">
+        <div><p class="lab">New problems</p><div class="step"><button type="button" data-step="fNew" data-d="-1" aria-label="Decrease new problems">−</button><input type="number" id="fNew" min="0" max="500" step="1" inputmode="numeric" value="0" aria-label="New problems"><button type="button" data-step="fNew" data-d="1" aria-label="Increase new problems">+</button></div></div>
+        <div><p class="lab">Revised problems</p><div class="step"><button type="button" data-step="fRevN" data-d="-1" aria-label="Decrease revised problems">−</button><input type="number" id="fRevN" min="0" max="500" step="1" inputmode="numeric" value="0" aria-label="Revised problems"><button type="button" data-step="fRevN" data-d="1" aria-label="Increase revised problems">+</button></div></div>
+      </div>
+      <div><p class="lab">Platform</p><div class="chips" data-cg="w"></div><input class="addin" data-g="w" placeholder="Other platform, press Enter" maxlength="30" aria-label="Add platform"></div>
+      <div><p class="lab">Company prep <span class="opt">optional</span></p><div class="chips" data-cg="co"></div><input class="addin" data-g="co" placeholder="Add a company, press Enter" maxlength="30" aria-label="Add company"></div>
+      <div><p class="lab">Topics solved</p><div class="chips" data-cg="tp"></div><input class="addin" data-g="tp" placeholder="Add a topic, press Enter" maxlength="30" aria-label="Add topic"></div>
+      <div id="rvBox" hidden><p class="lab">Topics revised</p><div class="chips" data-cg="rv"></div><input class="addin" data-g="rv" placeholder="Add a topic, press Enter" maxlength="30" aria-label="Add revision topic"></div>
+      <div><p class="lab">Difficulty</p><div class="chips" data-cg="ty"></div></div>
+      <div class="g2"><div><p class="lab">Completed?</p><div class="seg" data-seg="ok"><button type="button" class="chip" data-v="Yes" aria-pressed="false">Yes</button><button type="button" class="chip" data-v="No" aria-pressed="false">No</button></div></div>
+        <div><p class="lab">Test cases</p><div class="seg" data-seg="tc"><button type="button" class="chip" data-v="PASS" aria-pressed="false">Pass</button><button type="button" class="chip" data-v="FAIL" aria-pressed="false">Fail</button></div></div></div>
+    </div>
+    <div class="fsec"><h3>Time and notes</h3>
+      <div class="g2"><label>Hours<input type="number" id="fH" min="0" max="24" step="1" inputmode="numeric" placeholder="0"></label><label>Minutes<input type="number" id="fM" min="0" max="59" step="1" inputmode="numeric" placeholder="0"></label></div>
+      <div class="qk" aria-label="Quick time"><button type="button" class="chip" data-pre="15">15m</button><button type="button" class="chip" data-pre="30">30m</button><button type="button" class="chip" data-pre="45">45m</button><button type="button" class="chip" data-pre="60">1h</button><button type="button" class="chip" data-pre="90">1h 30m</button><button type="button" class="chip" data-pre="120">2h</button></div>
+      <label>Notes<textarea id="fNote" rows="2" maxlength="300" placeholder="Optional"></textarea></label>
+    </div>
+    <div class="foot"><p class="err" id="fErr" role="alert"></p><button type="submit" class="btn" data-again="1" id="saveAgain">Save and add another</button><button type="submit" class="btn primary">Save entry</button></div>
+  </form>
+</dialog>
+<dialog id="cel" class="cel" aria-labelledby="celT"><div class="cf" id="cf" aria-hidden="true"></div><div class="celbox"><div class="medal" id="celN"></div><h2 id="celT"></h2><p id="celP"></p><button type="button" class="btn primary lg" id="celX">Keep going</button></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="data/data.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
